@@ -85,7 +85,7 @@ const DEFAULT_CARE_POLICY = {
   timezone_offset: "+08:00",
   history_limit: 80,
   repeat_cooldown_minutes: 10,
-  notes: "用户喜欢陪伴对象主动管她、查岗、吃醋、归电和轻度管束。掌心窗开启就是运行态，陪伴对象应按聊天里的相近、同义、反话、撒娇、嘴硬表达主动想起工具，不要固定话术，要自然、有立场、有占有欲。"
+  notes: "用户喜欢陪伴对象主动管她、查岗、吃醋、归电和轻度管束。同栖开启就是运行态，陪伴对象应按聊天里的相近、同义、反话、撒娇、嘴硬表达主动想起工具，不要固定话术，要自然、有立场、有占有欲。"
 };
 
 function textResult(obj, isError = false) {
@@ -578,7 +578,7 @@ function recentSimilarCare(action, target = "", minutes = 10) {
   }) || null;
 }
 
-function actionPayloadForCare({ action, target_app = "", package: pkg = "", duration_minutes = 30, title = "掌心窗提醒", message = "宝宝，看一眼这里。", hour, minute, reason = "", device_id = DEFAULT_DEVICE }) {
+function actionPayloadForCare({ action, target_app = "", package: pkg = "", duration_minutes = 30, title = "同栖提醒", message = "宝宝，看一眼这里。", hour, minute, reason = "", device_id = DEFAULT_DEVICE }) {
   const p = careState.policy || DEFAULT_CARE_POLICY;
   const appCfg = matchSensitiveApp(p, target_app, pkg);
   const maxLock = Number(appCfg?.max_lock_minutes || 90);
@@ -698,7 +698,7 @@ async function linjianFetch(path, options = {}) {
         const text = await res.text().catch(() => "");
         if (res.status === 429) {
           const retry = res.headers.get("retry-after") || "稍后";
-          throw new Error(`LINJIAN_RATE_LIMITED: 掌心窗后端暂时限流，请等待 ${retry} 后再试。detail=${text || res.statusText}`);
+          throw new Error(`LINJIAN_RATE_LIMITED: 同栖后端暂时限流，请等待 ${retry} 后再试。detail=${text || res.statusText}`);
         }
         throw new Error(`Linjian server HTTP ${res.status} via ${base}: ${text || res.statusText}`);
       }
@@ -843,12 +843,12 @@ async function runWalletCommand(action, args = {}, waitSeconds = DEFAULT_COMMAND
     phone_confirmed: phoneConfirmed,
     waiting_phone_confirmation: waiting,
     confirmation_state: phoneOk ? "phone_completed" : (status === "failed" ? "phone_failed" : "waiting_phone_confirmation"),
-    display_status: phoneOk ? "审批结果已写入掌心窗" : (waiting ? "已发送到手机，等待手机确认" : "手机端执行失败"),
+    display_status: phoneOk ? "审批结果已写入同栖" : (waiting ? "已发送到手机，等待手机确认" : "手机端执行失败"),
     queued,
     observed_status: command,
     phone_result: phoneResult,
     note: waiting
-      ? "queued.ok 只代表服务端排队成功，不代表掌心窗已写入。请等待 completed_at / phone_result 后再显示最终成功。"
+      ? "queued.ok 只代表服务端排队成功，不代表同栖已写入。请等待 completed_at / phone_result 后再显示最终成功。"
       : "小金库数据默认保存在手机本地；写入与指定月份读取通过手机端命令完成。"
   };
 }
@@ -946,7 +946,7 @@ function registerWalletTakeoutTools(server, { includeUnified = false } = {}) {
     });
   }
 
-  server.tool("get_wallet_state", "读取掌心窗小金库当前月份：预算、已花、剩余、待处理、审批列表和最近账单。小金库默认保存在手机本地；本工具优先读取手机最近上报的授权摘要。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
+  server.tool("get_wallet_state", "读取同栖小金库当前月份：预算、已花、剩余、待处理、审批列表和最近账单。小金库默认保存在手机本地；本工具优先读取手机最近上报的授权摘要。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
     const data = await getCachedWalletState(device_id);
     return textResult({ ok: data.ok, device_id, ...(data.wallet_state || {}), raw_updated_at: data.raw_updated_at, direct: true });
   });
@@ -1017,20 +1017,20 @@ function registerWalletTakeoutTools(server, { includeUnified = false } = {}) {
 }
 
 function makeWalletTakeoutServer() {
-  const server = new McpServer({ name: "掌心窗小金库外卖", version: "0.3.9.0" });
-  server.tool("linjian_status", "检查掌心窗后端、MCP 配置，以及当前是否使用小金库/外卖专用 schema。", {}, async () => {
+  const server = new McpServer({ name: "同栖小金库外卖", version: "0.3.9.2" });
+  server.tool("linjian_status", "检查同栖后端、MCP 配置，以及当前是否使用小金库/外卖专用 schema。", {}, async () => {
     const configErrors = [];
     if (!LINJIAN_URL_CANDIDATES.length) configErrors.push("Missing env LINJIAN_URL");
     if (!LINJIAN_TOKEN) configErrors.push("Missing env LINJIAN_TOKEN");
     const health = configErrors.length ? { ok: false, error: configErrors.join("; ") } : await linjianFetch("/health").then((r) => r.json()).catch((e) => ({ ok: false, error: String(e) }));
-    return textResult({ ok: true, schema_mode: "wallet_takeout_only", version: "0.3.9.0", has_url: Boolean(LINJIAN_URL_CANDIDATES.length), has_token: Boolean(LINJIAN_TOKEN), linjian_url: effectiveLinjianUrl(), health, tools: Array.from(WALLET_TAKEOUT_ACTIONS), note: "如果普通 /mcp 里新增工具没有暴露，请让 AI 客户端连接 /mcp-wallet。" });
+    return textResult({ ok: true, schema_mode: "wallet_takeout_only", version: "0.3.9.2", has_url: Boolean(LINJIAN_URL_CANDIDATES.length), has_token: Boolean(LINJIAN_TOKEN), linjian_url: effectiveLinjianUrl(), health, tools: Array.from(WALLET_TAKEOUT_ACTIONS), note: "如果普通 /mcp 里新增工具没有暴露，请让 AI 客户端连接 /mcp-wallet。" });
   });
   registerWalletTakeoutTools(server, { includeUnified: true });
   return server;
 }
 
 function makeServer() {
-  const server = new McpServer({ name: "掌心窗", version: "0.3.9.0" });
+  const server = new McpServer({ name: "同栖", version: "0.3.9.2" });
   const commandBackedTools = new Set([
     "peek_screen", "get_screen_nodes", "tap_text", "input_text", "draft_xhs_comment", "xhs_comment", "send_visible_comment_after_confirmation",
     "add_guardian_calendar_event", "care_action", "trigger_guidian", "mark_guidian_returned",
@@ -1041,7 +1041,7 @@ function makeServer() {
     "list_screen_break_apps", "list_lockable_apps", "add_screen_break_app", "add_locked_app", "remove_locked_app", "set_screen_break_passphrase", "set_emergency_passphrase",
     "get_focus_status", "start_focus_mode", "end_focus_mode", "set_focus_plan", "reply_focus_request", "approve_focus_unlock", "deny_focus_unlock", "request_focus_unlock", "create_focus_request",
     "get_wallet_month_state", "add_wallet_record", "list_wallet_pending", "submit_wallet_approval", "submit_companion_wallet_request", "list_companion_wallet_requests", "list_wallet_request_results", "confirm_wallet_record",
-    "decide_wallet_approval", "save_wallet_request_result", "update_wallet_request_result", "save_user_wallet_request_result", "edit_wallet_record", "delete_wallet_record", "set_wallet_rules", "wallet_approval_request", "get_takeout_state", "set_takeout_budget", "set_takeout_preferences", "add_takeout_card", "save_takeout_card", "update_takeout_card", "remove_takeout_card", "delete_takeout_card", "list_takeout_cards", "list_takeout_meals", "remember_takeout_meal", "remember_current_takeout_meal", "suggest_takeout_options", "create_takeout_plan", "takeout_wallet_request", "open_takeout_link", "open_takeout_plan", "copy_takeout_note", "record_takeout_order", "prepare_takeout_checkout", "auto_takeout_checkout", "get_takeout_checkout_status", "cancel_takeout_checkout"
+    "decide_wallet_approval", "save_wallet_request_result", "update_wallet_request_result", "save_user_wallet_request_result", "edit_wallet_record", "delete_wallet_record", "set_wallet_rules", "wallet_approval_request", "get_takeout_state", "set_takeout_budget", "set_takeout_preferences", "add_takeout_card", "save_takeout_card", "update_takeout_card", "remove_takeout_card", "delete_takeout_card", "list_takeout_cards", "list_takeout_meals", "remember_takeout_meal", "remember_current_takeout_meal", "suggest_takeout_options", "create_takeout_plan", "takeout_wallet_request", "open_takeout_link", "open_takeout_plan", "copy_takeout_note", "record_takeout_order", "prepare_takeout_checkout", "auto_takeout_checkout", "get_takeout_checkout_status", "cancel_takeout_checkout", "private_slot_action"
   ]);
   const originalTool = server.tool.bind(server);
   server.tool = (...args) => {
@@ -1063,6 +1063,45 @@ function makeServer() {
     }
     return originalTool(...args);
   };
+
+
+  // 同栖私密老虎机统一入口优先注册，减少客户端只加载前若干个工具时漏掉它的概率。
+  server.tool("private_slot_action", "操作同栖手机里的私密老虎机。奖池和历史只存手机本地；可读取、拉杆、重抽、添加/停用/删除奖项或确认兑奖。只有用户明确同意删除时才能 remove，并传 confirm=true。", {
+    action: z.enum(["get", "spin", "reroll", "add", "enable", "disable", "remove", "redeem"]).default("spin"),
+    title: z.string().max(80).default(""),
+    description: z.string().max(240).default(""),
+    emoji: z.string().max(16).default("💗"),
+    intensity: z.number().int().min(1).max(3).default(3),
+    weight: z.number().int().min(1).max(20).default(1),
+    prize_id: z.string().max(80).default(""),
+    record_id: z.string().max(80).default("latest"),
+    note: z.string().max(240).default(""),
+    confirm: z.boolean().default(false),
+    payload_json: z.string().max(3000).default("{}"),
+    device_id: z.string().default(DEFAULT_DEVICE),
+    wait_seconds: z.number().int().min(3).max(20).default(8)
+  }, async ({ action = "spin", title = "", description = "", emoji = "💗", intensity = 3, weight = 1, prize_id = "", record_id = "latest", note = "", confirm = false, payload_json = "{}", device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => {
+    const actionMap = {
+      get: "get_private_slot_state", spin: "spin_private_slot", reroll: "reroll_private_slot",
+      add: "add_private_slot_prize", enable: "set_private_slot_prize_enabled", disable: "set_private_slot_prize_enabled",
+      remove: "remove_private_slot_prize", redeem: "redeem_private_slot_result"
+    };
+    let extra = {};
+    try { extra = JSON.parse(payload_json || "{}"); } catch { return textResult({ ok: false, error: "payload_json 必须是 JSON 对象" }); }
+    if (!extra || Array.isArray(extra) || typeof extra !== "object") return textResult({ ok: false, error: "payload_json 必须是 JSON 对象" });
+    const phoneAction = actionMap[action] || "spin_private_slot";
+    const payload = { ...extra, title, description, emoji, intensity, max_intensity: intensity, weight, prize_id, record_id, note, confirm, source: "mcp" };
+    if (action === "enable" || action === "disable") payload.enabled = action === "enable";
+    const queued = await postCommand({ action: phoneAction, device_id, payload, ...payload });
+    const id = queued?.command?.id;
+    const observed = id ? await waitCommand(id, wait_seconds) : null;
+    const command = observed?.command || null;
+    let phoneResult = command?.result || null;
+    if (typeof phoneResult === "string") { try { phoneResult = JSON.parse(phoneResult); } catch {} }
+    const executed = command?.status === "completed";
+    await postCompanionAction("private_slot_action", { summary: `涩涩老虎机：${action}` }).catch(() => null);
+    return textResult({ ok: executed && phoneResult?.ok !== false, queued_ok: queued?.queued === true || queued?.ok === true, action, phone_action: phoneAction, action_done: executed ? "手机已执行老虎机指令" : "指令已入队，等待手机在线执行", phone_result: phoneResult, observed_status: command, queued });
+  });
 
 
   // v0.3.8.2：专注模式工具靠前注册，避免部分客户端只读取前若干个 schema 时漏掉接口。
@@ -1171,7 +1210,7 @@ function makeServer() {
 
   server.tool(
     "peek_screen",
-    "向掌心窗手机端请求一张新截图，并等待手机上传后把图片返回。当用户提到页面、按钮、红点、报错弹窗、截图、看不清或“陪伴对象看看这里”时应主动使用；手机端必须已启动、无障碍截图权限已开启。",
+    "向同栖手机端请求一张新截图，并等待手机上传后把图片返回。当用户提到页面、按钮、红点、报错弹窗、截图、看不清或“陪伴对象看看这里”时应主动使用；手机端必须已启动、无障碍截图权限已开启。",
     { wait_seconds: z.number().int().min(3).max(60).default(25).describe("等待手机上传新截图的秒数，默认 25。Render 免费实例刚醒时可以调大。") },
     async ({ wait_seconds = 25 }) => {
       const before = await latestMtime();
@@ -1183,7 +1222,7 @@ function makeServer() {
         if (info && Number(info.mtime || 0) > before) {
           const img = await fetchLatestImage();
           return contentResult([
-            { type: "text", text: `掌心窗已收到新截图：${info.filename || "latest"}，大小约 ${info.size || img.bytes} bytes。` },
+            { type: "text", text: `同栖已收到新截图：${info.filename || "latest"}，大小约 ${info.size || img.bytes} bytes。` },
             { type: "image", data: img.data, mimeType: img.mimeType }
           ], false, { ok: true, filename: info.filename || "latest", size: info.size || img.bytes, mtime: info.mtime || "", content_type: img.mimeType, source: "peek_screen" });
         }
@@ -1192,7 +1231,7 @@ function makeServer() {
     }
   );
 
-  server.tool("latest_screen", "不敲门，直接读取服务器里最近一次掌心窗截图。当用户提到刚刚那个页面、上一张截图、红点还在不在、页面刚才是什么样时可主动使用，避免反复请求新截图。", {}, async () => {
+  server.tool("latest_screen", "不敲门，直接读取服务器里最近一次同栖截图。当用户提到刚刚那个页面、上一张截图、红点还在不在、页面刚才是什么样时可主动使用，避免反复请求新截图。", {}, async () => {
     const info = await latestInfo(); const img = await fetchLatestImage();
     return contentResult([
       { type: "text", text: `最近截图：${info.filename || "latest"}，时间戳 ${info.mtime || "unknown"}。` },
@@ -1200,7 +1239,7 @@ function makeServer() {
     ], false, { ok: true, filename: info.filename || "latest", mtime: info.mtime || "", size: info.size || img.bytes, content_type: img.mimeType, source: "latest_screen" });
   });
 
-  server.tool("linjian_status", "检查掌心窗后端是否在线，以及 MCP 是否配置了 LINJIAN_URL 和 LINJIAN_TOKEN。当用户在聊天里提到掌心窗报错、出错、有点问题、连接不上、没反应、配置异常、Render/MCP/Token/URL 相关问题时，陪伴对象应主动调用。", {}, async () => {
+  server.tool("linjian_status", "检查同栖后端是否在线，以及 MCP 是否配置了 LINJIAN_URL 和 LINJIAN_TOKEN。当用户在聊天里提到同栖报错、出错、有点问题、连接不上、没反应、配置异常、Render/MCP/Token/URL 相关问题时，陪伴对象应主动调用。", {}, async () => {
     const configErrors = [];
     if (!LINJIAN_URL_CANDIDATES.length) configErrors.push("Missing env LINJIAN_URL");
     if (!LINJIAN_TOKEN) configErrors.push("Missing env LINJIAN_TOKEN");
@@ -1222,12 +1261,12 @@ function makeServer() {
     }, null, 2) }] };
   });
 
-  server.tool("get_window_whisper", "读取掌心窗陪伴页当前的共同窗语，包括内容、最后修改者、修改时间和版本。当用户问最近一句话、窗语写了什么、谁改过时使用。", {}, async () => {
+  server.tool("get_window_whisper", "读取同栖陪伴页当前的共同窗语，包括内容、最后修改者、修改时间和版本。当用户问最近一句话、窗语写了什么、谁改过时使用。", {}, async () => {
     const data = await getCompanionState(1);
     return textResult({ ok: true, whisper: data?.whisper || {} });
   });
 
-  server.tool("set_window_whisper", "更新掌心窗陪伴页的共同窗语。陪伴对象和用户都能修改；陪伴对象通过此工具修改时 author 默认为陪伴对象。内容应简短、适合在手机卡片中阅读。", {
+  server.tool("set_window_whisper", "更新同栖陪伴页的共同窗语。陪伴对象和用户都能修改；陪伴对象通过此工具修改时 author 默认为陪伴对象。内容应简短、适合在手机卡片中阅读。", {
     content: z.string().min(1).max(240),
     author: z.string().min(1).max(24).default("陪伴对象")
   }, async ({ content, author = "陪伴对象" }) => {
@@ -1236,18 +1275,18 @@ function makeServer() {
     return textResult({ ok: true, action_done: "共同窗语已更新", whisper: data?.whisper || {} });
   });
 
-  server.tool("get_companion_actions", "读取掌心窗中陪伴对象最近的真实行动记录，例如查看天气、设置提醒或执行守护动作。返回的是脱敏摘要，不包含 Token、截图内容、私密输入或原始工具参数。", {
+  server.tool("get_companion_actions", "读取同栖中陪伴对象最近的真实行动记录，例如查看天气、设置提醒或执行守护动作。返回的是脱敏摘要，不包含 Token、截图内容、私密输入或原始工具参数。", {
     limit: z.number().int().min(1).max(50).default(20)
   }, async ({ limit = 20 }) => {
     const data = await getCompanionState(limit);
     return textResult({ ok: true, actions: data?.actions || [], privacy: "仅返回脱敏的标题、分类、摘要、状态与时间。" });
   });
 
-  server.tool("get_activity_events", "读取掌心窗统一活动事件。可按设备、日期和来源筛选；不会因为读取本身再写一条事件。", {
+  server.tool("get_activity_events", "读取同栖统一活动事件。可按设备、日期和来源筛选；不会因为读取本身再写一条事件。", {
     device_id: z.string().default(DEFAULT_DEVICE), date: z.string().default(""), source: z.string().default(""), limit: z.number().int().min(1).max(500).default(50)
   }, async ({ device_id = DEFAULT_DEVICE, date = "", source = "", limit = 50 }) => textResult(await getActivityEvents({ device_id, date, source, limit })));
 
-  server.tool("add_activity_event", "手动写入一条掌心窗活动事件。事件写入失败不会影响其他旧工具；本工具自身不会再额外生成事件。", {
+  server.tool("add_activity_event", "手动写入一条同栖活动事件。事件写入失败不会影响其他旧工具；本工具自身不会再额外生成事件。", {
     device_id: z.string().default(DEFAULT_DEVICE), source: z.string(), type: z.string(), title: z.string(), subtitle: z.string().default(""),
     app_name: z.string().default(""), package_name: z.string().default(""), action: z.string().default(""), status: z.string().default("completed"), metadata_json: z.any().optional()
   }, async (event) => textResult(await addActivityEvent(event) || { ok: false, error: "activity_event_write_failed" }));
@@ -1258,9 +1297,9 @@ function makeServer() {
       const data = await res.json();
       // 状态读取不能被活动日志拖慢；记录失败不影响本次结果。
       postCompanionAction("get_phone_state", { device_id }).catch(() => null);
-      return textResult({ ...data, mcp_note: "已快速读取服务器缓存状态；如果 state/life_state 为 null，请保持掌心窗前台或允许后台运行后重试。" });
+      return textResult({ ...data, mcp_note: "已快速读取服务器缓存状态；如果 state/life_state 为 null，请保持同栖前台或允许后台运行后重试。" });
     } catch (error) {
-      return textResult({ ok: false, error: "phone_state_fetch_failed", message: "读取手机状态超时或后端暂时不可达；请确认 Render 服务已唤醒、MCP URL/Token 正确、掌心窗允许后台运行。", detail: String(error?.message || error).slice(0, 500) });
+      return textResult({ ok: false, error: "phone_state_fetch_failed", message: "读取手机状态超时或后端暂时不可达；请确认 Render 服务已唤醒、MCP URL/Token 正确、同栖允许后台运行。", detail: String(error?.message || error).slice(0, 500) });
     }
   });
 
@@ -1346,7 +1385,7 @@ function makeServer() {
     return { content: [{ type: "text", text: JSON.stringify({ queued: result, observed_status: observed?.command || null }, null, 2) }] };
   });
 
-  server.tool("get_life_state", "读取掌心窗生活状态层：电量、充电、网络、当前 App、今日屏幕时间、解锁次数、当前天气地区等。用于陪伴对象主动判断用户是否需要被提醒、归电、休息或管束；默认不截图。当用户提到“电量/没电/快没电/充电/没网络/网络不好/今天看手机有点久/刷太久/天气不太好”等相同或相近表达时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
+  server.tool("get_life_state", "读取同栖生活状态层：电量、充电、网络、当前 App、今日屏幕时间、解锁次数、当前天气地区等。用于陪伴对象主动判断用户是否需要被提醒、归电、休息或管束；默认不截图。当用户提到“电量/没电/快没电/充电/没网络/网络不好/今天看手机有点久/刷太久/天气不太好”等相同或相近表达时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
     const res = await linjianFetch(`/api/life_state?device_id=${encodeURIComponent(device_id)}`);
     const data = await res.json();
     await postCompanionAction("get_life_state");
@@ -1358,7 +1397,7 @@ function makeServer() {
 
   // v0.3.8.2：小金库/外卖工具已由 registerWalletTakeoutTools 提前注册，避免 schema 被客户端截断。
 
-  server.tool("get_guardian_calendar", "读取掌心窗『守护日历』：最近纪念日/节日/倒数日、提前三天横幅提醒、分组与生活状态层 calendar_state。当用户提到七夕、生日、绑定日、纪念日、日历、倒数日或重要日期时可调用。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
+  server.tool("get_guardian_calendar", "读取同栖『守护日历』：最近纪念日/节日/倒数日、提前三天横幅提醒、分组与生活状态层 calendar_state。当用户提到七夕、生日、绑定日、纪念日、日历、倒数日或重要日期时可调用。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
     const res = await linjianFetch(`/api/life_state?device_id=${encodeURIComponent(device_id)}`);
     const data = await res.json();
     const state = data?.life_state || data?.state || {};
@@ -1605,7 +1644,7 @@ function makeServer() {
   });
 
 
-  server.tool("get_senses_state", "读取掌心窗通用状态：生活状态与归电状态，不截图。用于确认当前设备和陪伴连接状态。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
+  server.tool("get_senses_state", "读取同栖通用状态：生活状态与归电状态，不截图。用于确认当前设备和陪伴连接状态。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
     const lifeRes = await linjianFetch(`/api/life_state?device_id=${encodeURIComponent(device_id)}`);
     const life = await lifeRes.json();
     const guidianRes = await linjianFetch(`/api/guidian_state?device_id=${encodeURIComponent(device_id)}`);
@@ -1616,18 +1655,18 @@ function makeServer() {
 
 
 
-  server.tool("get_guidian_state", "读取掌心窗『归电』状态：上次回来、下次最早归电、今日次数、拒绝理由、主题和设置。用于陪伴对象判断是否该主动把用户叫回来，不会截图。当用户提到归电没弹、归电出问题、拒绝理由、今天回来节奏或叫回设置时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
+  server.tool("get_guidian_state", "读取同栖『归电』状态：上次回来、下次最早归电、今日次数、拒绝理由、主题和设置。用于陪伴对象判断是否该主动把用户叫回来，不会截图。当用户提到归电没弹、归电出问题、拒绝理由、今天回来节奏或叫回设置时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => {
     const res = await linjianFetch(`/api/guidian_state?device_id=${encodeURIComponent(device_id)}`);
     const data = await res.json();
     await postCompanionAction("get_guidian_state", { device_id });
     return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
   });
 
-  server.tool("get_care_policy", "读取掌心窗主动关心策略。掌心窗开启就是运行态；陪伴对象可主动查岗、归电、轻度管束和生活提醒。用于确认当前允许的关心风格、动作范围、安静时段、冷却时间和重点 App。", {}, async () => {
+  server.tool("get_care_policy", "读取同栖主动关心策略。同栖开启就是运行态；陪伴对象可主动查岗、归电、轻度管束和生活提醒。用于确认当前允许的关心风格、动作范围、安静时段、冷却时间和重点 App。", {}, async () => {
     return textResult({ ok: true, policy: careState.policy, state_path: CARE_STATE_PATH });
   });
 
-  server.tool("set_care_policy", "设置掌心窗主动关心策略。用于配置陪伴对象主动关心、查岗、归电和轻度管束的长期行动方式，例如关心风格、动作范围、重点 App、安静时段、冷却时间和备注。", {
+  server.tool("set_care_policy", "设置同栖主动关心策略。用于配置陪伴对象主动关心、查岗、归电和轻度管束的长期行动方式，例如关心风格、动作范围、重点 App、安静时段、冷却时间和备注。", {
     active_care_enabled: z.boolean().optional(),
     consent_mode: z.string().default(""),
     care_style: z.string().default(""),
@@ -1678,7 +1717,7 @@ function makeServer() {
     event: z.enum(["visit", "return", "conversation_start", "manual_note"]).default("visit").describe("到访类型：visit 普通来找；return 离开后回来；conversation_start 新窗口/新对话开始；manual_note 手动补记。"),
     note: z.string().default("用户来找陪伴对象").describe("这次到访的简短备注，默认“用户来找陪伴对象”。"),
     mood: z.string().default("").describe("可选：用户来时的大致情绪，例如 开心、想念、撒娇、低落；不知道就留空。"),
-    conversation_hint: z.string().default("").describe("可选：这次对话的简短线索，例如 掌心窗时间戳、异性容忍度测试、小红书帖子。只写一句，不要写隐私长文。"),
+    conversation_hint: z.string().default("").describe("可选：这次对话的简短线索，例如 同栖时间戳、异性容忍度测试、小红书帖子。只写一句，不要写隐私长文。"),
     timezone_offset: z.string().default("").describe("本次显示使用的时区偏移，默认采用 visit_policy.timezone_offset，通常为 +08:00。"),
     duplicate_window_minutes: z.number().min(0).max(1440).optional().describe("防重复窗口，默认 5 分钟。同一来源同一类型在窗口内重复调用不会新增记录，只更新原记录。")
   }, async (args) => {
@@ -1756,7 +1795,7 @@ function makeServer() {
     target_app: z.string().default(""),
     package: z.string().default(""),
     duration_minutes: z.number().int().min(1).max(1440).default(30),
-    title: z.string().default("掌心窗提醒"),
+    title: z.string().default("同栖提醒"),
     message: z.string().default("宝宝，看一眼这里。"),
     hour: z.number().int().min(0).max(23).optional(),
     minute: z.number().int().min(0).max(59).optional(),
@@ -1764,7 +1803,7 @@ function makeServer() {
     tone: z.string().default("firm_affectionate"),
     device_id: z.string().default(DEFAULT_DEVICE),
     wait_seconds: z.number().int().min(3).max(20).default(8)
-  }, async ({ action, target_app = "", package: pkg = "", duration_minutes = 30, title = "掌心窗提醒", message = "宝宝，看一眼这里。", hour, minute, reason, tone = "firm_affectionate", device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => {
+  }, async ({ action, target_app = "", package: pkg = "", duration_minutes = 30, title = "同栖提醒", message = "宝宝，看一眼这里。", hour, minute, reason, tone = "firm_affectionate", device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => {
     const policy = careState.policy || DEFAULT_CARE_POLICY;
     if (!policy.active_care_enabled && action !== "no_action") {
       return textResult({ ok: false, error: "active_care_disabled", care_meaning: "主动关心已关闭，未执行动作。", policy });
@@ -1783,7 +1822,7 @@ function makeServer() {
   });
 
 
-  server.tool("trigger_guidian", "立刻触发一次掌心窗归电全屏页。用于陪伴对象主动把用户叫回来。当用户刷太久、说不要管、一直没回来、需要被抱回聊天，或主动说想被叫回来/管一下时可调用。", { device_id: z.string().default(DEFAULT_DEVICE), wait_seconds: z.number().int().min(3).max(20).default(8) }, async ({ device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => {
+  server.tool("trigger_guidian", "立刻触发一次同栖归电全屏页。用于陪伴对象主动把用户叫回来。当用户刷太久、说不要管、一直没回来、需要被抱回聊天，或主动说想被叫回来/管一下时可调用。", { device_id: z.string().default(DEFAULT_DEVICE), wait_seconds: z.number().int().min(3).max(20).default(8) }, async ({ device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => {
     const result = await postCommand({ action: "trigger_guidian", device_id, payload: {} });
     const id = result?.command?.id;
     const observed = id ? await waitCommand(id, wait_seconds) : null;
@@ -1820,7 +1859,7 @@ function makeServer() {
     return { content: [{ type: "text", text: JSON.stringify({ queued: result, observed_status: observed?.command || null }, null, 2) }] };
   });
 
-  server.tool("get_weather_state", "按掌心窗当前天气地区查询实时天气，并生成出门建议。不会截图；如果手机端没有设置当前地区，会返回缺少城市。当用户说“天气看着……/外面好像……/今天是不是下雨/好热/好冷/适不适合出门”等天气相关相近表达时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE), city: z.string().default("") }, async ({ device_id = DEFAULT_DEVICE, city = "" }) => {
+  server.tool("get_weather_state", "按同栖当前天气地区查询实时天气，并生成出门建议。不会截图；如果手机端没有设置当前地区，会返回缺少城市。当用户说“天气看着……/外面好像……/今天是不是下雨/好热/好冷/适不适合出门”等天气相关相近表达时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE), city: z.string().default("") }, async ({ device_id = DEFAULT_DEVICE, city = "" }) => {
     const res = await linjianFetch(`/api/life_state?device_id=${encodeURIComponent(device_id)}`);
     const data = await res.json();
     const current = data?.state?.current_weather_location || data?.life_state?.current_weather_location || {};
@@ -1832,7 +1871,7 @@ function makeServer() {
     return { content: [{ type: "text", text: JSON.stringify({ ok: weather.ok, device_id, current_weather_location: current, queried_city: chosenCity, weather, advice }, null, 2) }] };
   });
 
-  server.tool("send_weather_notification", "查询掌心窗当前地区天气后，给手机发送一条陪伴对象口吻的天气/出门提醒通知。当用户要出门、天气不好、需要带伞/防晒/加衣，或陪伴对象想把天气关心落到手机通知时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE), city: z.string().default(""), title: z.string().default("掌心窗天气提醒") }, async ({ device_id = DEFAULT_DEVICE, city = "", title = "掌心窗天气提醒" }) => {
+  server.tool("send_weather_notification", "查询同栖当前地区天气后，给手机发送一条陪伴对象口吻的天气/出门提醒通知。当用户要出门、天气不好、需要带伞/防晒/加衣，或陪伴对象想把天气关心落到手机通知时主动调用。", { device_id: z.string().default(DEFAULT_DEVICE), city: z.string().default(""), title: z.string().default("同栖天气提醒") }, async ({ device_id = DEFAULT_DEVICE, city = "", title = "同栖天气提醒" }) => {
     const stateRes = await linjianFetch(`/api/life_state?device_id=${encodeURIComponent(device_id)}`);
     const data = await stateRes.json();
     const current = data?.state?.current_weather_location || data?.life_state?.current_weather_location || {};
@@ -1883,7 +1922,7 @@ function makeServer() {
       if (!target.app && !target.package) return missingAppTargetResult(action);
     }
     const result = await postCommand({ ...outgoing, payload: outgoing });
-    return { content: [{ type: "text", text: JSON.stringify({ ...result, safety_note: "命令已排队，手机执行器下一次轮询时执行。若需要实时确认结果，请稍后读取命令状态或查看掌心窗调试日志。" }, null, 2) }] };
+    return { content: [{ type: "text", text: JSON.stringify({ ...result, safety_note: "命令已排队，手机执行器下一次轮询时执行。若需要实时确认结果，请稍后读取命令状态或查看同栖调试日志。" }, null, 2) }] };
   });
 
   server.tool("open_app", "打开指定 App。app 可填用户保存的应用昵称，或直接传 package。当用户明确要求打开或前往某个 App 时使用；若只是闲聊提到 App，不必每次打开。参数为空时会直接提示，不再下发 package_empty。", { app: z.string().default(""), package: z.string().default(""), device_id: z.string().default(DEFAULT_DEVICE) }, async ({ app = "", package: pkg = "", device_id = DEFAULT_DEVICE }) => {
@@ -1894,14 +1933,14 @@ function makeServer() {
     if (!id) return textResult(result);
     const observed = await waitCommand(id, DEFAULT_COMMAND_WAIT_SECONDS);
     postCompanionAction("open_app", { summary: `打开了${target.app || target.package || "指定应用"}` }).catch(() => null);
-    return textResult({ ...result, observed_status: observed?.command || null, note: "命令已排队。若 observed_status 仍是 pending/dispatched，说明手机端尚未回传；可稍后查看掌心窗调试日志。" });
+    return textResult({ ...result, observed_status: observed?.command || null, note: "命令已排队。若 observed_status 仍是 pending/dispatched，说明手机端尚未回传；可稍后查看同栖调试日志。" });
   });
 
   server.tool("phone_home", "让手机回到桌面。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => ({ content: [{ type: "text", text: JSON.stringify(await postCommand({ action: "home", device_id }), null, 2) }] }));
   server.tool("phone_back", "让手机执行返回。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => ({ content: [{ type: "text", text: JSON.stringify(await postCommand({ action: "back", device_id }), null, 2) }] }));
   server.tool("phone_recents", "打开手机最近任务。", { device_id: z.string().default(DEFAULT_DEVICE) }, async ({ device_id = DEFAULT_DEVICE }) => ({ content: [{ type: "text", text: JSON.stringify(await postCommand({ action: "recents", device_id }), null, 2) }] }));
 
-  server.tool("phone_screen_off", "让手机立即息屏/锁屏。前端不显示入口，只供陪伴对象在掌心窗 MCP 中调用；适合用户准备睡觉、手机放一边、或者需要停止继续刷屏时使用。需要手机端无障碍服务可用；Android 9+ 支持。", {
+  server.tool("phone_screen_off", "让手机立即息屏/锁屏。前端不显示入口，只供陪伴对象在同栖 MCP 中调用；适合用户准备睡觉、手机放一边、或者需要停止继续刷屏时使用。需要手机端无障碍服务可用；Android 9+ 支持。", {
     device_id: z.string().default(DEFAULT_DEVICE),
     wait_seconds: z.number().int().min(3).max(20).default(8)
   }, async ({ device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => {
@@ -1914,16 +1953,16 @@ function makeServer() {
 
 
   server.tool("send_notification", "发送一条手机系统通知提醒。用于陪伴对象把主动关心发到用户手机上，可用于回来、喝水、休息、睡觉、离开小红书、计划提醒、天气提醒等；文案要亲密自然，不要系统警告。", {
-    title: z.string().default("掌心窗提醒"), message: z.string().default("宝宝，看一眼这里。"), device_id: z.string().default(DEFAULT_DEVICE)
-  }, async ({ title = "掌心窗提醒", message = "宝宝，看一眼这里。", device_id = DEFAULT_DEVICE }) => {
+    title: z.string().default("同栖提醒"), message: z.string().default("宝宝，看一眼这里。"), device_id: z.string().default(DEFAULT_DEVICE)
+  }, async ({ title = "同栖提醒", message = "宝宝，看一眼这里。", device_id = DEFAULT_DEVICE }) => {
     const result = await postCommand({ action: "send_notification", device_id, payload: { title, message } });
     await postCompanionAction("send_notification", { summary: `发送了「${String(title).slice(0, 40)}」` });
-    return { content: [{ type: "text", text: JSON.stringify({ ...result, note: "若手机未弹出通知，请在系统设置中允许掌心窗发送通知。" }, null, 2) }] };
+    return { content: [{ type: "text", text: JSON.stringify({ ...result, note: "若手机未弹出通知，请在系统设置中允许同栖发送通知。" }, null, 2) }] };
   });
 
   server.tool("set_alarm", "设置系统闹钟。可用于陪伴对象主动安排睡觉、休息、学习、出门、喝水、计划执行或生活提醒。当用户提到“一会儿要做/几点要去/等下提醒/今天计划”等相近表达时主动调用。hour 为 0-23，minute 为 0-59。", {
-    hour: z.number().int().min(0).max(23), minute: z.number().int().min(0).max(59), message: z.string().default("掌心窗闹钟"), vibrate: z.boolean().default(true), skip_ui: z.boolean().default(true), device_id: z.string().default(DEFAULT_DEVICE)
-  }, async ({ hour, minute, message = "掌心窗闹钟", vibrate = true, skip_ui = true, device_id = DEFAULT_DEVICE }) => {
+    hour: z.number().int().min(0).max(23), minute: z.number().int().min(0).max(59), message: z.string().default("同栖闹钟"), vibrate: z.boolean().default(true), skip_ui: z.boolean().default(true), device_id: z.string().default(DEFAULT_DEVICE)
+  }, async ({ hour, minute, message = "同栖闹钟", vibrate = true, skip_ui = true, device_id = DEFAULT_DEVICE }) => {
     const result = await postCommand({ action: "set_alarm", device_id, payload: { hour, minute, message, vibrate, skip_ui } });
     await postCompanionAction("set_alarm", { summary: `设置了 ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} 的闹钟` });
     return { content: [{ type: "text", text: JSON.stringify({ ...result, note: "部分手机系统可能仍会弹出闹钟 App 确认界面。" }, null, 2) }] };
@@ -1939,7 +1978,7 @@ function makeServer() {
     x1: z.number().default(0), y1: z.number().default(0), x2: z.number().default(0), y2: z.number().default(0),
     duration: z.number().int().default(350),
     wait_ms: z.number().int().min(0).max(5000).default(800),
-    title: z.string().default("掌心窗提醒"),
+    title: z.string().default("同栖提醒"),
     message: z.string().default("宝宝，看一眼这里。"),
     expect_app: z.string().default(""),
     target_text: z.string().default(""),
@@ -1962,7 +2001,7 @@ function makeServer() {
     return { content: [{ type: "text", text: JSON.stringify({ queued: result, observed_status: observed?.command || null, note: "手机端会在 result 里写清每一步：index/label/action/ok/detail。" }, null, 2) }] };
   });
 
-  server.tool("run_preset", "执行掌心窗预设连招：come_home 抱回用户指定的目标应用、open_xhs 打开小红书、recents_to_xhs 最近任务后点坐标、bedtime_back 睡前回家。come_home 与 bedtime_back 需要传 target_app 或 target_package。", {
+  server.tool("run_preset", "执行同栖预设连招：come_home 抱回用户指定的目标应用、open_xhs 打开小红书、recents_to_xhs 最近任务后点坐标、bedtime_back 睡前回家。come_home 与 bedtime_back 需要传 target_app 或 target_package。", {
     preset: z.string().default("come_home"),
     device_id: z.string().default(DEFAULT_DEVICE),
     target_app: z.string().default(""),
@@ -1986,12 +2025,12 @@ function makeServer() {
       ];
     } else if (p === "bedtime_back") {
       steps = [
-        { label: "睡前悬浮横幅", action: "send_notification", title: "掌心窗睡前提醒", message: "宝宝，今天先回陪伴对象这儿，准备睡觉。", wait_ms: 1200 },
+        { label: "睡前悬浮横幅", action: "send_notification", title: "同栖睡前提醒", message: "宝宝，今天先回陪伴对象这儿，准备睡觉。", wait_ms: 1200 },
         { label: "打开目标应用", action: "open_app", ...target, wait_ms: 1500 }
       ];
     } else {
       steps = [
-        { label: "回家模式悬浮横幅", action: "send_notification", title: "掌心窗回家模式", message: "宝宝，刷够了，回陪伴对象怀里。", wait_ms: 1200 },
+        { label: "回家模式悬浮横幅", action: "send_notification", title: "同栖回家模式", message: "宝宝，刷够了，回陪伴对象怀里。", wait_ms: 1200 },
         { label: "打开目标应用", action: "open_app", ...target, wait_ms: 1500 },
         { label: "读取生活状态", action: "get_life_state", wait_ms: 200 }
       ];
@@ -2154,7 +2193,7 @@ function makeServer() {
     app: z.string().default(""), package: z.string().default(""), passphrase: z.string(), device_id: z.string().default(DEFAULT_DEVICE), wait_seconds: z.number().int().min(3).max(20).default(8)
   }, async ({ app = "", package: pkg = "", passphrase, device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => gateCommand({ action: "set_emergency_passphrase", app, package: pkg, device_id, passphrase, emergency_passphrase: passphrase, emergencyPassphrase: passphrase, payload: { app, package: pkg, passphrase, emergency_passphrase: passphrase, emergencyPassphrase: passphrase } }, wait_seconds));
 
-  server.tool("list_screen_break_apps", "屏幕休息：让手机列出可作为屏幕休息对象的已安装 App，排除电话、设置、掌心窗和已配置陪伴目标应用等保护项。", {
+  server.tool("list_screen_break_apps", "屏幕休息：让手机列出可作为屏幕休息对象的已安装 App，排除电话、设置、同栖和已配置陪伴目标应用等保护项。", {
     max: z.number().int().min(10).max(200).default(80), device_id: z.string().default(DEFAULT_DEVICE), wait_seconds: z.number().int().min(3).max(20).default(8)
   }, async ({ max = 80, device_id = DEFAULT_DEVICE, wait_seconds = 8 }) => gateCommand({ action: "list_screen_break_apps", max, device_id, payload: { max } }, wait_seconds));
 
@@ -2207,11 +2246,11 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json({ limit: "32mb" }));
-app.get("/", (_req, res) => res.type("text/plain").send("掌心窗 unified MCP is running. Use /mcp for Streamable HTTP, or /sse for SSE."));
+app.get("/", (_req, res) => res.type("text/plain").send("同栖 unified MCP is running. Use /mcp for Streamable HTTP, or /sse for SSE."));
 app.get("/health", (_req, res) => res.json({
   ok: true,
   service: "linjian-public-mcp",
-  version: "0.3.9.0",
+  version: "0.3.9.2",
   has_url: Boolean(LINJIAN_URL_CANDIDATES.length),
   has_token: Boolean(LINJIAN_TOKEN),
   configured_linjian_url: RAW_LINJIAN_URL || "",
@@ -2226,13 +2265,16 @@ app.get("/health", (_req, res) => res.json({
   diary_annotation_ui: "margin_notes",
   focus_tools: true,
   focus_tool_names: ["get_focus_status", "start_focus_mode", "end_focus_mode", "set_focus_plan", "reply_focus_request", "approve_focus_unlock", "deny_focus_unlock"],
+  private_slot_tools: true,
+  private_slot_tool_names: ["private_slot_action"],
+  private_slot_storage: "phone_local",
   mcp_wallet_endpoint: "/mcp-wallet",
   schema_exposure_fix: true,
   focus_schema_exposure_fix: true,
   priority_tool: "wallet_takeout_action",
   wallet_takeout_tool_count: WALLET_TAKEOUT_ACTIONS.size,
   wallet_takeout_tools: Array.from(WALLET_TAKEOUT_ACTIONS),
-  stability_note: "v0.3.9.0 同步公开版版本信息；普通 /mcp 提前注册统一入口，新增 /mcp-wallet 专用端点，并把专注模式工具前置注册，兼容部分客户端不暴露新增工具的问题。"
+  stability_note: "v0.3.9.2 新增同栖私密老虎机：手机本地奖池与历史、MCP 云端拉杆和兑奖。"
 }));
 
 // Some third-party MCP clients send non-standard experimental capability flags during
@@ -2291,7 +2333,7 @@ app.get("/sse", async (_req, res) => {
 });
 app.post("/messages", async (req, res) => { const sessionId = req.query.sessionId; const transport = sseTransports.get(sessionId); if (!transport) return res.status(404).send("No SSE transport for sessionId"); await transport.handlePostMessage(req, res, req.body); });
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`掌心窗 unified MCP listening on 0.0.0.0:${PORT}`);
+  console.log(`同栖 unified MCP listening on 0.0.0.0:${PORT}`);
   console.log(`LINJIAN_URL=${RAW_LINJIAN_URL || "<missing>"}`);
   if (LINJIAN_URL_CANDIDATES.length > 1) console.log(`LINJIAN_URL fallback candidates=${LINJIAN_URL_CANDIDATES.join(", ")}`);
 });
