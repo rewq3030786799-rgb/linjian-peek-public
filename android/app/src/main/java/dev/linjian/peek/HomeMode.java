@@ -66,7 +66,7 @@ public class HomeMode {
 
             p.edit().putLong(KEY_LAST_FIRE, now).apply();
             String app = state.optString("current_app", pkg);
-            boolean popup = CompanionService.showHomeModeNotification(ctx, "掌心窗回家模式", AppPrefs.userName(ctx) + "，你在 " + app + " 停了 " + ((now - start) / MIN) + " 分钟。休息一下，回到" + AppPrefs.companionName(ctx) + "这里吧。");
+            boolean popup = CompanionService.showHomeModeNotification(ctx, "同栖回家模式", AppPrefs.userName(ctx) + "，你在 " + app + " 停了 " + ((now - start) / MIN) + " 分钟。休息一下，回到" + AppPrefs.companionName(ctx) + "这里吧。");
             DebugState.append(ctx, popup ? "回家模式已发悬浮横幅提醒：" + pkg : "回家模式提醒失败：" + pkg);
             if (force) {
                 if (target.isEmpty()) {

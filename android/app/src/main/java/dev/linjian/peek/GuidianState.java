@@ -18,7 +18,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-/** 掌心窗 · 归电：只存连接状态，不读取聊天内容。 */
+/** 同栖 · 归电：只存连接状态，不读取聊天内容。 */
 public class GuidianState {
     public static final String KEY_ENABLED = "guidian_enabled";
     public static final String KEY_ALLOW_REMOTE = "guidian_allow_remote";
@@ -355,7 +355,7 @@ public class GuidianState {
             NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
             if (nm == null) return false;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "掌心窗归电", NotificationManager.IMPORTANCE_HIGH);
+                NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "同栖归电", NotificationManager.IMPORTANCE_HIGH);
                 channel.setDescription(AppPrefs.companionName(ctx) + "的来电式全屏提醒");
                 channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                 channel.enableVibration(true);

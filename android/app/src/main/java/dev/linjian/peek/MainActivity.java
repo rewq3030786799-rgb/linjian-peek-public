@@ -136,7 +136,7 @@ public class MainActivity extends Activity {
         loadSettings();
         NowState.start(this);
 
-        DebugState.append(this, "掌心窗公开版 v0.3.9.0 已打开");
+        DebugState.append(this, "同栖公开版 v0.3.9.1 已打开");
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 13);
         serviceRunning = CompanionService.isRunning();
         updateUI();
@@ -205,7 +205,7 @@ public class MainActivity extends Activity {
         if (tabDebug != null) tabDebug.setOnClickListener(v -> showTab("settings"));
         if (quickSeeButton != null) quickSeeButton.setOnClickListener(v -> showTab("see"));
         if (quickGuardButton != null) quickGuardButton.setOnClickListener(v -> showTab("gate"));
-        CompanionWindowState.recordJourney(this, "打开掌心窗", "回到今天的窗边");
+        CompanionWindowState.recordJourney(this, "打开同栖", "回到今天的窗边");
         showTab("life");
         applyBottomNavigationInsets();
         playOpeningWindowAnimation();
@@ -1083,7 +1083,7 @@ public class MainActivity extends Activity {
     }
 
     private void showDiaryCoverMenu() {
-        new AlertDialog.Builder(this).setTitle("更换封面").setItems(new String[]{"掌心窗柔和纸质封面", "从本机选择图片"}, (d, which) -> { if (which == 0) { DiaryState.updateCover(this, diaryBookId, DiaryState.DEFAULT_COVER, ""); showDiaryHomePage(); } else chooseDiaryCover(); }).show();
+        new AlertDialog.Builder(this).setTitle("更换封面").setItems(new String[]{"同栖柔和纸质封面", "从本机选择图片"}, (d, which) -> { if (which == 0) { DiaryState.updateCover(this, diaryBookId, DiaryState.DEFAULT_COVER, ""); showDiaryHomePage(); } else chooseDiaryCover(); }).show();
     }
 
     private void chooseDiaryCover() { try { Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT); i.setType("image/*"); i.addCategory(Intent.CATEGORY_OPENABLE); i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION); startActivityForResult(i, REQ_DIARY_COVER); } catch (Exception e) { Toast.makeText(this, "系统相册没有接住封面选择", Toast.LENGTH_SHORT).show(); } }
@@ -1134,7 +1134,7 @@ public class MainActivity extends Activity {
         endingCopy.setOrientation(LinearLayout.VERTICAL);
         TextView love = title("Je t’aime.", 15);
         endingCopy.addView(love);
-        TextView loveZh = body("掌心窗里的守护，轻一点就够了。", 9);
+        TextView loveZh = body("同栖里的守护，轻一点就够了。", 9);
         endingCopy.addView(loveZh, matchWrapTop(3));
         ending.addView(endingCopy, weightedWrap(1f, 10));
         root.addView(ending);
@@ -1171,7 +1171,7 @@ public class MainActivity extends Activity {
                         cmd.put("action", "start_focus_mode");
                         cmd.put("duration_minutes", 5);
                         cmd.put("goal", "测试专注模式");
-                        cmd.put("message", "这 5 分钟先交给掌心窗守住。需要时可以留言给他，也有 1 次应急放行。");
+                        cmd.put("message", "这 5 分钟先交给同栖守住。需要时可以留言给他，也有 1 次应急放行。");
                         cmd.put("emergency_total", 1);
                         cmd.put("emergency_minutes", 1);
                         FocusMode.handleCommand(this, cmd);
@@ -1963,7 +1963,7 @@ public class MainActivity extends Activity {
             else { headerTitle.setText("Toujours à tes côtés"); headerSubtitle.setText("一直在你身边 · 守护状态与重要日子"); }
         }
         else { headerTitle.setText("设置这扇窗"); headerSubtitle.setText("调整" + AppPrefs.companionName(this) + "、窗面、提醒与隐私记录。"); }
-        if (brandText != null) brandText.setText("掌心窗  ·  " + ("life".equals(tab) ? "今天" : ("see".equals(tab) ? (diaryPageOpen ? "TA 的日记" : "陪伴") : ("gate".equals(tab) ? (guardianCalendarDetailOpen ? "守护日历" : "守护") : "设置"))));
+        if (brandText != null) brandText.setText("同栖  ·  " + ("life".equals(tab) ? "今天" : ("see".equals(tab) ? (diaryPageOpen ? "TA 的日记" : "陪伴") : ("gate".equals(tab) ? (guardianCalendarDetailOpen ? "守护日历" : "守护") : "设置"))));
     }
     private String greeting() { int h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY); return h < 5 ? "夜深了" : (h < 11 ? "早上好" : (h < 14 ? "午安" : (h < 18 ? "下午好" : (h < 23 ? "晚上好" : "夜深了")))); }
     private void setVisible(View v, boolean visible) { if (v != null) v.setVisibility(visible ? View.VISIBLE : View.GONE); }
@@ -2164,7 +2164,7 @@ public class MainActivity extends Activity {
             illustration.setScaleType(ImageView.ScaleType.CENTER_CROP);
             splash.addView(illustration, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             TextView wordmark = new TextView(this);
-            wordmark.setText("掌心窗"); wordmark.setTextSize(11); wordmark.setLetterSpacing(0.18f); wordmark.setGravity(Gravity.CENTER); wordmark.setTextColor(t.primary); wordmark.setAlpha(0f);
+            wordmark.setText("同栖"); wordmark.setTextSize(11); wordmark.setLetterSpacing(0.18f); wordmark.setGravity(Gravity.CENTER); wordmark.setTextColor(t.primary); wordmark.setAlpha(0f);
             FrameLayout.LayoutParams wordmarkLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(38), Gravity.BOTTOM); wordmarkLp.bottomMargin = dp(38);
             splash.addView(wordmark, wordmarkLp);
             content.addView(splash, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -2429,7 +2429,7 @@ public class MainActivity extends Activity {
         try {
             Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
             i.setType("application/json"); i.addCategory(Intent.CATEGORY_OPENABLE);
-            i.putExtra(Intent.EXTRA_TITLE, "掌心窗-TA的日记-" + new SimpleDateFormat("yyyyMMdd", Locale.US).format(new Date()) + ".json");
+            i.putExtra(Intent.EXTRA_TITLE, "同栖-TA的日记-" + new SimpleDateFormat("yyyyMMdd", Locale.US).format(new Date()) + ".json");
             startActivityForResult(i, REQ_DIARY_EXPORT);
         } catch (Exception e) { Toast.makeText(this, "系统文件管理器没有接住导出", Toast.LENGTH_SHORT).show(); }
     }
@@ -2481,11 +2481,11 @@ public class MainActivity extends Activity {
         saveSettings();
         String url = serverUrl == null ? "" : serverUrl.getText().toString().trim(); String token = tokenInput == null ? "" : tokenInput.getText().toString().trim();
         if (url.isEmpty() || token.isEmpty()) { Toast.makeText(this, "请填写服务器地址和 Token", Toast.LENGTH_SHORT).show(); return; }
-        if (ScreenshotService.getInstance() == null) { DebugState.append(this, "启动失败：无障碍服务未连接"); Toast.makeText(this, "请先开启掌心窗无障碍服务", Toast.LENGTH_LONG).show(); openAccessibilitySettings(); return; }
+        if (ScreenshotService.getInstance() == null) { DebugState.append(this, "启动失败：无障碍服务未连接"); Toast.makeText(this, "请先开启同栖无障碍服务", Toast.LENGTH_LONG).show(); openAccessibilitySettings(); return; }
         getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit().putBoolean("user_stopped", false).apply(); requestIgnoreBatteryOptimization();
         Intent intent = new Intent(this, CompanionService.class); intent.putExtra("server_url", url); intent.putExtra("token", token);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent); else startService(intent);
-        DebugState.append(this, "已请求启动前台服务：公开版 v0.3.9.0 右侧 love 线稿花枝已启用"); serviceRunning = true; updateUI();
+        DebugState.append(this, "已请求启动前台服务：公开版 v0.3.9.1 右侧 love 线稿花枝已启用"); serviceRunning = true; updateUI();
     }
 
     private void stopCompanionService() { getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit().putBoolean("user_stopped", true).apply(); stopService(new Intent(this, CompanionService.class)); DebugState.append(this, "已停止服务"); serviceRunning = false; updateUI(); }
@@ -2496,12 +2496,12 @@ public class MainActivity extends Activity {
         if (ss == null) { DebugState.append(this, "测试失败：无障碍服务未连接"); Toast.makeText(this, "先开启无障碍服务", Toast.LENGTH_LONG).show(); openAccessibilitySettings(); return; }
         DebugState.append(this, "给" + AppPrefs.companionName(this) + "看一眼：开始截图上传"); ss.doScreenshot(url, token); Toast.makeText(this, "正在上传截图", Toast.LENGTH_SHORT).show(); updateUI();
     }
-    private void testAlarm() { Calendar c = Calendar.getInstance(); c.add(Calendar.MINUTE, 1); try { Intent i = new Intent(AlarmClock.ACTION_SET_ALARM); i.putExtra(AlarmClock.EXTRA_HOUR, c.get(Calendar.HOUR_OF_DAY)); i.putExtra(AlarmClock.EXTRA_MINUTES, c.get(Calendar.MINUTE)); i.putExtra(AlarmClock.EXTRA_MESSAGE, "掌心窗测试闹钟：" + AppPrefs.userName(this)); i.putExtra(AlarmClock.EXTRA_VIBRATE, true); i.putExtra(AlarmClock.EXTRA_SKIP_UI, true); startActivity(i); DebugState.append(this, "已请求设置一分钟后的测试闹钟"); } catch (Exception e) { DebugState.append(this, "测试闹钟失败：" + e.getClass().getSimpleName()); Toast.makeText(this, "闹钟 App 没接住请求", Toast.LENGTH_SHORT).show(); } }
-    private void testNotification() { saveSettings(); boolean ok = CompanionService.showReminderNotification(this, "掌心窗悬浮横幅测试", AppPrefs.userName(this) + "看到了顶部横幅，就说明通知通道正常。"); DebugState.append(this, ok ? "已发送悬浮横幅测试提醒" : "悬浮横幅/通知失败：请允许掌心窗发送通知"); Toast.makeText(this, ok ? "已发送横幅测试" : "请先允许通知权限", Toast.LENGTH_SHORT).show(); updateUI(); }
+    private void testAlarm() { Calendar c = Calendar.getInstance(); c.add(Calendar.MINUTE, 1); try { Intent i = new Intent(AlarmClock.ACTION_SET_ALARM); i.putExtra(AlarmClock.EXTRA_HOUR, c.get(Calendar.HOUR_OF_DAY)); i.putExtra(AlarmClock.EXTRA_MINUTES, c.get(Calendar.MINUTE)); i.putExtra(AlarmClock.EXTRA_MESSAGE, "同栖测试闹钟：" + AppPrefs.userName(this)); i.putExtra(AlarmClock.EXTRA_VIBRATE, true); i.putExtra(AlarmClock.EXTRA_SKIP_UI, true); startActivity(i); DebugState.append(this, "已请求设置一分钟后的测试闹钟"); } catch (Exception e) { DebugState.append(this, "测试闹钟失败：" + e.getClass().getSimpleName()); Toast.makeText(this, "闹钟 App 没接住请求", Toast.LENGTH_SHORT).show(); } }
+    private void testNotification() { saveSettings(); boolean ok = CompanionService.showReminderNotification(this, "同栖悬浮横幅测试", AppPrefs.userName(this) + "看到了顶部横幅，就说明通知通道正常。"); DebugState.append(this, ok ? "已发送悬浮横幅测试提醒" : "悬浮横幅/通知失败：请允许同栖发送通知"); Toast.makeText(this, ok ? "已发送横幅测试" : "请先允许通知权限", Toast.LENGTH_SHORT).show(); updateUI(); }
     private void addPackageAlias() { String alias = appAliasInput == null ? "" : appAliasInput.getText().toString().trim(); String pkg = appPackageInput == null ? "" : appPackageInput.getText().toString().trim(); if (alias.isEmpty()) { Toast.makeText(this, "先填应用名/昵称", Toast.LENGTH_SHORT).show(); return; } if (!AppPrefs.isPackageLike(pkg)) { Toast.makeText(this, "包名格式不对，例如 com.xingin.xhs", Toast.LENGTH_LONG).show(); return; } AppPrefs.saveCustomApp(this, alias, pkg); DebugState.append(this, "已保存可打开应用：" + alias + " → " + pkg); Toast.makeText(this, "已添加包名", Toast.LENGTH_SHORT).show(); updateUI(); }
     private void addGateApp() { String alias = gateAliasInput == null ? "" : gateAliasInput.getText().toString().trim(); String pkg = gatePackageInput == null ? "" : gatePackageInput.getText().toString().trim(); if (alias.isEmpty()) { Toast.makeText(this, "先填应用名/昵称", Toast.LENGTH_SHORT).show(); return; } if (!AppPrefs.isPackageLike(pkg)) { Toast.makeText(this, "包名格式不对，例如 com.xingin.xhs", Toast.LENGTH_LONG).show(); return; } AppGate.addGateApp(this, alias, pkg); DebugState.append(this, "已保存门禁应用：" + alias + " → " + pkg); Toast.makeText(this, "已添加到应用门禁", Toast.LENGTH_SHORT).show(); updateUI(); }
     private void testCustomPackage() { String pkg = appPackageInput == null ? "" : appPackageInput.getText().toString().trim(); if (!AppPrefs.isPackageLike(pkg)) { Toast.makeText(this, "先填正确包名", Toast.LENGTH_SHORT).show(); return; } openPackage(pkg); }
-    private void testLocalSequence() { boolean ok1 = CompanionService.showReminderNotification(this, "掌心窗连招测试", "先发悬浮横幅，再回目标 APP。日志会写清每一步。"); String result = CompanionService.openPackageResult(this, AppPrefs.homeTargetPackage(this)); DebugState.append(this, "本机连招测试：popup=" + ok1 + "；open=" + result); updateUI(); }
+    private void testLocalSequence() { boolean ok1 = CompanionService.showReminderNotification(this, "同栖连招测试", "先发悬浮横幅，再回目标 APP。日志会写清每一步。"); String result = CompanionService.openPackageResult(this, AppPrefs.homeTargetPackage(this)); DebugState.append(this, "本机连招测试：popup=" + ok1 + "；open=" + result); updateUI(); }
     private boolean openPackage(String pkg) { String result = CompanionService.openPackageResult(this, pkg); boolean ok = result.startsWith("opened_"); DebugState.append(this, "本机打开 App：" + result); Toast.makeText(this, ok ? "已尝试打开" : ("打开失败：" + result), Toast.LENGTH_SHORT).show(); updateUI(); return ok; }
     private void updateVersionUi() {
         boolean hasNew = latestVersionCode > AppPrefs.APP_VERSION_CODE;
@@ -2565,10 +2565,10 @@ public class MainActivity extends Activity {
             getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit().putLong(PREF_A11Y_SETTINGS_OPENED_AT, System.currentTimeMillis()).apply();
             Intent i = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
             startActivity(i);
-            Toast.makeText(this, "开启“掌心窗服务”后返回；若返回仍未开启，请先允许受限设置", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "开启“同栖服务”后返回；若返回仍未开启，请先允许受限设置", Toast.LENGTH_LONG).show();
             scheduleAccessibilityFollowupChecks();
         } catch (Exception e) {
-            Toast.makeText(this, "设置 → 应用 → 掌心窗 → 允许受限设置；再到无障碍开启掌心窗服务", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "设置 → 应用 → 同栖 → 允许受限设置；再到无障碍开启同栖服务", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -2577,9 +2577,9 @@ public class MainActivity extends Activity {
             Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             i.setData(Uri.parse("package:" + getPackageName()));
             startActivity(i);
-            Toast.makeText(this, "如有右上角菜单，请先点“允许受限设置”，再回无障碍开启掌心窗服务", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "如有右上角菜单，请先点“允许受限设置”，再回无障碍开启同栖服务", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(this, "设置 → 应用 → 掌心窗 → 右上角 → 允许受限设置", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "设置 → 应用 → 同栖 → 右上角 → 允许受限设置", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -2587,13 +2587,13 @@ public class MainActivity extends Activity {
         try {
             new AlertDialog.Builder(this)
                     .setTitle("无障碍还没真正连上")
-                    .setMessage("如果你在系统无障碍里打开后，回到掌心窗又变成未开启，通常是系统还没完成绑定，或 Android/部分国产系统拦截了侧载 APK 的无障碍权限。\n\n请先等 5-10 秒；如果仍未开启，到“应用信息 → 掌心窗 → 右上角菜单”允许受限设置，然后再回无障碍开启“掌心窗服务”。")
+                    .setMessage("如果你在系统无障碍里打开后，回到同栖又变成未开启，通常是系统还没完成绑定，或 Android/部分国产系统拦截了侧载 APK 的无障碍权限。\n\n请先等 5-10 秒；如果仍未开启，到“应用信息 → 同栖 → 右上角菜单”允许受限设置，然后再回无障碍开启“同栖服务”。")
                     .setPositiveButton("去无障碍设置", (d, w) -> openAccessibilitySettings())
                     .setNegativeButton("去应用信息", (d, w) -> openAppDetailsSettings())
                     .setNeutralButton("我知道了", null)
                     .show();
         } catch (Exception e) {
-            Toast.makeText(this, "先允许受限设置，再开启掌心窗服务", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "先允许受限设置，再开启同栖服务", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -2696,9 +2696,9 @@ public class MainActivity extends Activity {
     private void openNotificationListenerSettings() {
         try {
             startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-            Toast.makeText(this, "开启“掌心窗媒体状态”后返回；仅用于此刻卡片显示正在播放的音频", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "开启“同栖媒体状态”后返回；仅用于此刻卡片显示正在播放的音频", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(this, "设置 → 应用 → 特殊权限 → 通知使用权 → 掌心窗媒体状态", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "设置 → 应用 → 特殊权限 → 通知使用权 → 同栖媒体状态", Toast.LENGTH_LONG).show();
         }
     }
     private void requestLocationPermission() {
@@ -2923,7 +2923,7 @@ public class MainActivity extends Activity {
         else if (screenMinutes >= 480) secondary = "让眼睛离开屏幕半分钟，看看远一点。";
         else {
             String app = s.optString("current_app", "").trim();
-            secondary = app.isEmpty() ? "窗外安安静静，状态都在轻轻更新。" : "此刻在 " + app + "，掌心窗替你看着今天。";
+            secondary = app.isEmpty() ? "窗外安安静静，状态都在轻轻更新。" : "此刻在 " + app + "，同栖替你看着今天。";
         }
 
         if (overviewAdviceText != null) overviewAdviceText.setText(formatHeroMessage(primary));

@@ -170,7 +170,7 @@ public class WeatherState {
         if (n.contains("热") || n.contains("高温") || n.contains("晒")) return "出门建议：水杯和防晒记得带。";
         if (n.contains("风") || n.contains("大风")) return "出门建议：风大，头发和外套都顾一下。";
         if (n.contains("空气") || n.contains("霾") || n.contains("污染")) return "出门建议：空气一般，少在外面吹太久。";
-        return "出门建议：当前地区已设好，查看掌心窗时会一起显示。";
+        return "出门建议：当前地区已设好，查看同栖时会一起显示。";
     }
 
     private static String clean(String s) { return s == null ? "" : s.trim().replace("|", " ").replace("\n", " "); }

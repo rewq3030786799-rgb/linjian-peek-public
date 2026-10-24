@@ -30,7 +30,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-/** 掌心窗内的小金库模块：预算、记账、待审批、规则与统计。 */
+/** 同栖内的小金库模块：预算、记账、待审批、规则与统计。 */
 public class WalletActivity extends Activity {
     private LinearLayout root, content;
     private TextView title, actionText, ruleText;

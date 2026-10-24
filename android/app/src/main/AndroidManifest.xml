@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="dev.linjian.peek"
-    android:versionCode="30900"
-    android:versionName="0.3.9.0">
+    android:versionCode="30901"
+    android:versionName="0.3.9.1">
 
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34" />
 
@@ -46,7 +46,7 @@
     </queries>
 
     <application
-        android:label="掌心窗"
+        android:label="同栖"
         android:icon="@drawable/ic_launcher"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:usesCleartextTraffic="true"
@@ -132,7 +132,7 @@
 
         <service
             android:name=".MediaNotificationService"
-            android:label="掌心窗媒体状态"
+            android:label="同栖媒体状态"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

@@ -167,7 +167,7 @@ public final class ActivityEventStore {
         catch (Exception ignored) { return pkg; }
     }
     private static String titleForPackage(Context ctx, String pkg, String app) {
-        if (pkg.equals(ctx.getPackageName())) return "打开掌心窗";
+        if (pkg.equals(ctx.getPackageName())) return "打开同栖";
         return "打开" + (app == null || app.isEmpty() ? "应用" : app);
     }
     private static void hydrateLocalTime(JSONObject e) {

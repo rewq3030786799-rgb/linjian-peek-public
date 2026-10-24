@@ -44,7 +44,7 @@ public class TakeoutState {
             JSONObject wallet = WalletState.collect(ctx);
             JSONObject checkout = checkoutSession(ctx);
             out.put("ok", true);
-            out.put("takeout_version", "0.3.9.0-public-takeout");
+            out.put("takeout_version", "0.3.9.1-public-takeout");
             out.put("device_id", AppPrefs.device(ctx));
             out.put("meal_budget", WalletState.round2(mealBudget));
             out.put("day_budget", WalletState.round2(dayBudget));
@@ -143,7 +143,7 @@ public class TakeoutState {
     }
 
     /**
-     * 第一次由用户打开具体菜品并复制“这道饭”的分享链接，掌心窗把它记成可重复使用的饭。
+     * 第一次由用户打开具体菜品并复制“这道饭”的分享链接，同栖把它记成可重复使用的饭。
      * link/direct_link 可以显式传入；为空时会尝试读取当前剪贴板。支持保存多道饭，最多 MAX_CARDS 条。
      */
     public static JSONObject rememberMeal(Context ctx, JSONObject cmd) throws Exception {
@@ -158,7 +158,7 @@ public class TakeoutState {
         String title = cmd.optString("title", "").trim();
         if (isJdShortLink(direct) && title.length() == 0) {
             return new JSONObject().put("ok", false).put("error", "jd_meal_name_required")
-                    .put("hint", "京东外卖的 3.cn 分享通常只是店铺入口，请给这道饭填一个菜名，例如“土豆片炒肉木桶饭”。掌心窗会解析店铺入口后在店内自动找这道菜。");
+                    .put("hint", "京东外卖的 3.cn 分享通常只是店铺入口，请给这道饭填一个菜名，例如“土豆片炒肉木桶饭”。同栖会解析店铺入口后在店内自动找这道菜。");
         }
         if (title.length() == 0) title = suggestTitleFromShareText(cmd.optString("share_text", ""));
         if (title.length() == 0) title = suggestTitleFromShareText(clipboardText(ctx));
@@ -457,7 +457,7 @@ public class TakeoutState {
     public static JSONObject prepareCheckout(Context ctx, JSONObject cmd) throws Exception {
         long expires = cmd.optLong("expires_at_ms", 0);
         if (expires > 0 && System.currentTimeMillis() > expires) return new JSONObject().put("ok", false).put("error", "stale_takeout_command").put("detail", "命令已过期，不执行旧点单任务。");
-        if (!ScreenshotService.ready()) return new JSONObject().put("ok", false).put("error", "accessibility_not_ready").put("hint", "请先开启掌心窗无障碍权限。");
+        if (!ScreenshotService.ready()) return new JSONObject().put("ok", false).put("error", "accessibility_not_ready").put("hint", "请先开启同栖无障碍权限。");
         String requestedId = nonEmpty(cmd.optString("card_id", ""), cmd.optString("meal_id", ""));
         JSONObject card = findCard(ctx, requestedId, cmd.optString("query", cmd.optString("item", cmd.optString("meal", ""))));
         if (card == null) return new JSONObject().put("ok", false).put("error", "takeout_card_not_found");

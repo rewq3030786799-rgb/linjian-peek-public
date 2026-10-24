@@ -171,7 +171,7 @@ public class TakeoutActivity extends Activity {
         EditText note = input("固定备注，例如 少辣、不用打电话", false); form.addView(note);
         EditText checkoutMax = input("最多多少钱（可空）", true); form.addView(checkoutMax);
         content.addView(form);
-        content.addView(emptyCard("京东外卖不用再找“具体菜品深链”：复制这家店的 3.cn 分享链接，再手动填菜名即可。点单时掌心窗会让 Cloudflare 先解析真实京东落地页，直接交给京东 App，再在店内找你填的那道菜；不会再经过 Chrome 登录中转。可以记很多道饭。", "记"));
+        content.addView(emptyCard("京东外卖不用再找“具体菜品深链”：复制这家店的 3.cn 分享链接，再手动填菜名即可。点单时同栖会让 Cloudflare 先解析真实京东落地页，直接交给京东 App，再在店内找你填的那道菜；不会再经过 Chrome 登录中转。可以记很多道饭。", "记"));
         actionText.setOnClickListener(v -> {
             try {
                 JSONObject cmd = new JSONObject();
