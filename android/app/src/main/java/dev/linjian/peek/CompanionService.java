@@ -64,7 +64,7 @@ public class CompanionService extends Service {
             DebugState.append(this, "服务启动失败：服务器地址或 Token 为空");
             stopSelf(); return START_NOT_STICKY;
         }
-        DebugState.append(this, "同栖公开版 v0.3.9.1 服务已启动，目标：" + serverUrl);
+        DebugState.append(this, "同栖公开版 v0.3.9.2 服务已启动，目标：" + serverUrl);
         if (!running) { running = true; startPolling(); } else DebugState.append(this, "服务已在运行，继续轮询");
         return START_STICKY;
     }
@@ -235,6 +235,14 @@ public class CompanionService extends Service {
                 try { reportCommand(ctx, serverUrl, token, id, ok, result); uploadStateThrottled(serverUrl, token, ctx, true); } catch (Exception ignored) { }
                 return;
             }
+            if (isPrivateSlotAction(action)) {
+                JSONObject rr = PrivateSlotState.handleCommand(ctx, cmd);
+                boolean ok = rr.optBoolean("ok", false);
+                String result = rr.toString();
+                DebugState.append(ctx, "执行涩涩老虎机命令 " + action + "：" + result);
+                try { reportCommand(ctx, serverUrl, token, id, ok, result); uploadStateThrottled(serverUrl, token, ctx, true); } catch (Exception ignored) { }
+                return;
+            }
             if ("run_sequence".equals(action)) {
                 executeSequence(ctx, id, cmd, serverUrl, token);
                 return;
@@ -277,6 +285,12 @@ public class CompanionService extends Service {
         return "get_takeout_state".equals(action) || "list_takeout_cards".equals(action) || "list_takeout_meals".equals(action) || "remember_takeout_meal".equals(action) || "remember_current_takeout_meal".equals(action) || "set_takeout_budget".equals(action) || "set_takeout_preferences".equals(action) || "add_takeout_card".equals(action) || "save_takeout_card".equals(action) || "update_takeout_card".equals(action) || "remove_takeout_card".equals(action) || "delete_takeout_card".equals(action) || "suggest_takeout_options".equals(action) || "create_takeout_plan".equals(action) || "open_takeout_link".equals(action) || "open_takeout_plan".equals(action) || "copy_takeout_note".equals(action) || "record_takeout_order".equals(action) || "takeout_wallet_request".equals(action) || "prepare_takeout_checkout".equals(action) || "auto_takeout_checkout".equals(action) || "get_takeout_checkout_status".equals(action) || "cancel_takeout_checkout".equals(action);
     }
 
+    private static boolean isPrivateSlotAction(String action) {
+        return "get_private_slot_state".equals(action) || "spin_private_slot".equals(action) || "reroll_private_slot".equals(action)
+                || "add_private_slot_prize".equals(action) || "remove_private_slot_prize".equals(action)
+                || "set_private_slot_prize_enabled".equals(action) || "redeem_private_slot_result".equals(action);
+    }
+
     private static void executeCommand(Context ctx, String id, String action, String app, String pkg, float x, float y, float x1, float y1, float x2, float y2, long duration, int hour, int minute, String title, String message, boolean vibrate, String serverUrl, String token) {
         executeCommand(ctx, id, action, app, pkg, x, y, x1, y1, x2, y2, duration, hour, minute, title, message, vibrate, serverUrl, token, true, "", "", "contains", 1, false);
     }
@@ -302,6 +316,7 @@ public class CompanionService extends Service {
             } else if ("get_life_state".equals(action)) { ok = true; result = LifeState.collect(ctx).toString();
             } else if (isWalletAction(action)) { JSONObject rr = WalletState.handleCommand(ctx, new JSONObject().put("action", action).put("amount", 0)); ok = rr.optBoolean("ok", false); result = rr.toString();
             } else if (isTakeoutAction(action)) { JSONObject rr = TakeoutState.handleCommand(ctx, new JSONObject().put("action", action)); ok = rr.optBoolean("ok", false); result = rr.toString();
+            } else if (isPrivateSlotAction(action)) { JSONObject rr = PrivateSlotState.handleCommand(ctx, new JSONObject().put("action", action)); ok = rr.optBoolean("ok", false); result = rr.toString();
             } else if ("get_calendar_state".equals(action) || "upsert_calendar_event".equals(action) || "add_calendar_event".equals(action) || "delete_calendar_event".equals(action)) { JSONObject rr = CalendarState.handleCommand(ctx, new JSONObject().put("action", action).put("title", title).put("date", message)); ok = rr.optBoolean("ok", false); result = rr.optString("result", rr.toString());
             } else if (FocusMode.isFocusAction(action)) {
                 JSONObject focusCmd = new JSONObject().put("action", action).put("app", app).put("package", pkg);

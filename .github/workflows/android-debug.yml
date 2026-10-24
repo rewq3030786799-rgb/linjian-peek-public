@@ -39,8 +39,8 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tongqi-v0.3.9.1-apk
+          name: tongqi-v0.3.9.2-apk
           path: android/*.apk
           if-no-files-found: error
 
-# Actions enabled: trigger Tongqi v0.3.9.1 build
+# Actions enabled: trigger Tongqi v0.3.9.2 build
