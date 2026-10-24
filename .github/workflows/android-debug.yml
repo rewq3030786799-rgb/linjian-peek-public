@@ -42,3 +42,5 @@ jobs:
           name: tongqi-v0.3.9.1-apk
           path: android/*.apk
           if-no-files-found: error
+
+# Tongqi v0.3.9.1 build trigger
